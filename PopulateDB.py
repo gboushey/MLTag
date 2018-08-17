@@ -1,6 +1,5 @@
-## in case you're wondering
+## get the number of observations for each study
 ## select studies.name, count(studies.name) from studies, entities, observations where studies.id = observations.study_id and entities.id = observations.entity_id group by (studies.name) order by count(studies.name) ASC;
-
 
 import json
 import re
@@ -10,8 +9,6 @@ import config
 
 f = open("__data_export.json")
 data = json.load(f)
-
-
 
 keywords = set()
 for d in data.keys():
@@ -48,7 +45,7 @@ for d in data.keys():
         name = d
         keywords = []
         for k in data[d]['keywords']:
-            word = re.sub("[^a-zA-Z0-9/s]"," ", k).strip()
+            word = re.sub("[^a-zA-Z0-9/s]"," ", k).strip().lower()
             word = word.replace(" ", "_")
             keywords.append(word)
             unique_keywords.add(word)

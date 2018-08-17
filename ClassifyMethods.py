@@ -24,9 +24,18 @@ def classify_text(text, classifier):
     binary_predictions = clf.predict_proba(test_data_features)
 
     return{classifier:{"probability":binary_predictions[0][1]}}
-      
-def classify_list(text, classifiers):
     
+ 
+def classify_list(text, classifiers):
+    """Assign probability that a section of text belongs to one or more classifiers.
+
+       Args:
+           text: the text to be classified
+           classifiers: a list of classifiers 
+       Returns:
+           a dictionary containing each classifier (key) and the probabilty 
+           that the text should be included in this classifier (value)
+       """
     class_predictions = {}
     
     for c in classifiers:
