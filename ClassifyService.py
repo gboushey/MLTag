@@ -7,12 +7,14 @@ def classify():
     
     text = request.query.text
     classifier = request.query.classifier
+    classifier_type = request.query.classifier_type
     
-    return classify_text(text, classifier)
+    return classify_text(text, classifier, classifier_type)
         
 @route('/classify_multiple')
 def classify_multiple():
     text = request.query.text
+    classifier_type = request.query.classifier_type
     classifiers = request.GET.getall('classifiers')
     if not classifiers:
         classifiers = get_classifiers()
@@ -55,7 +57,8 @@ def delete():
 @route('/generate_classifier')
 def generate_classifier():
     classifier = request.query.classifier
-    build_classifier(classifier)
+    classifier_type = request.query.classifier_type
+    build_classifier(classifier, classifier_type)
     return {'classifier': classifier}
     
 @route('/generate_all_classifiers')

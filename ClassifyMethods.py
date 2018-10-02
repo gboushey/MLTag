@@ -13,10 +13,10 @@ def classify_text(text, classifier):
     with open('./Classifiers/clf_' + classifier + '.pickle', 'rb') as f:
         clf = pickle.load(f)
 
-    with open('./Classifiers/vectorizer_' + classifier + '.pickle', 'rb') as f:
+    with open('./Classifiers/vectorizer_'  + classifier + '.pickle', 'rb') as f:
         vectorizer = pickle.load(f)
         
-    with open('./Classifiers/oversample_' + classifier + '.pickle', 'rb') as f:
+    with open('./Classifiers/oversample_'  + classifier + '.pickle', 'rb') as f:
         oversample = pickle.load(f)
     
     test_data_features = vectorizer.transform(text)

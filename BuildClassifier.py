@@ -1,8 +1,13 @@
 # to run from command line
-#  python -c 'from BuildClassifier import build_classifier; build_classifier(<classifier_name>)'
+#  python -c 'from BuildClassifier import build_classifier; build_classifier(<classifier_name>, <classifier_type)'
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import SVC
 import pandas as pd
 import pickle
 from pandasql import sqldf
@@ -16,6 +21,9 @@ def build_all():
     #    print(file[7:-4])
     #    build_classifier(file[7:-4])
 
+    classifier_types = ["RandomForest", "MLP", "MultinomialNB", "LogisticRegression"]
+    
+
     db=MySQLdb.connect(host=config.host,user=config.user,
                       passwd=config.passwd,db=config.db)
 
@@ -23,16 +31,18 @@ def build_all():
 
     #q = "select name from studies"
 
-    q = "select studies.name, count(studies.name) from studies, entities, observations \
-    where studies.id = observations.study_id and entities.id = observations.entity_id \
-    group by (studies.name) HAVING count(studies.name) > 100 order by count(studies.name) ASC;"
+    for classifier_type in classifier_types:
 
-    c.execute(q)
+        q = "select studies.name, count(studies.name) from studies, entities, observations \
+        where studies.id = observations.study_id and entities.id = observations.entity_id \
+        group by (studies.name) HAVING count(studies.name) > 200 order by count(studies.name) ASC;"
+
+        c.execute(q)
     
-    for r in c.fetchall():
-        build_classifier(r[0])
+        for r in c.fetchall():
+            build_classifier(r[0], classifier_type)
 
-def build_classifier(classifier_name):
+def build_classifier(classifier_name, classifier_type):
 
     try:
 
@@ -109,23 +119,40 @@ def build_classifier(classifier_name):
 
         train_data_features = vectorizer.fit_transform(train["text"])
 
-        clf = RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini',
+        if classifier_type == "RandomForest":
+            clf = RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini',
                     max_depth=None, max_features='auto', max_leaf_nodes=None,
                     min_impurity_decrease=0.0, min_impurity_split=None,
                     min_samples_leaf=1, min_samples_split=2,
                     min_weight_fraction_leaf=0.0, n_estimators=500, n_jobs=1,
                     oob_score=True, random_state=None, verbose=0,
                     warm_start=False)
+                    
+        elif classifier_type == "MLP":
+            clf = MLPClassifier()
+        
+        elif classifier_type == "MultinomialNB":
+            clf = MultinomialNB()
+            
+        elif classifier_type == "LogisticRegression":
+            clf = LogisticRegression()
+            
+        elif classifier_type == "SVC":
+            clf = SVC()
+
+        else:
+            print("error - no matching classifier")
+            exit(-1)
 
         clf.fit( train_data_features, train["category"] )    
 
-        with open('./Classifiers/clf_' + classifier_name + '.pickle', 'wb') as f:
+        with open('./Classifiers/clf_' + classifier_name + '_' + classifier_type + '.pickle', 'wb') as f:
             pickle.dump(clf, f, pickle.HIGHEST_PROTOCOL)
 
-        with open('./Classifiers/vectorizer_' + classifier_name + '.pickle', 'wb') as f:
+        with open('./Classifiers/vectorizer_' + classifier_name + '_' + classifier_type + '.pickle', 'wb') as f:
             pickle.dump(vectorizer, f, pickle.HIGHEST_PROTOCOL)
 
-        with open('./Classifiers/oversample_' + classifier_name + '.pickle', 'wb') as f:
+        with open('./Classifiers/oversample_' + classifier_name + '_' + classifier_type + '.pickle', 'wb') as f:
             pickle.dump(oversample, f, pickle.HIGHEST_PROTOCOL)
         
     except:
