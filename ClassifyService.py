@@ -19,7 +19,7 @@ def classify_multiple():
     if not classifiers:
         classifiers = get_classifiers()
         
-    return classify_list(text, classifiers)
+    return classify_list(text, classifiers, classifier_type)
    
 @route('/classifiers')
 def classifiers():

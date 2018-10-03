@@ -35,7 +35,7 @@ def build_all():
 
         q = "select studies.name, count(studies.name) from studies, entities, observations \
         where studies.id = observations.study_id and entities.id = observations.entity_id \
-        group by (studies.name) HAVING count(studies.name) > 200 order by count(studies.name) ASC;"
+        group by (studies.name) HAVING count(studies.name) > 100 order by count(studies.name) ASC;"
 
         c.execute(q)
     

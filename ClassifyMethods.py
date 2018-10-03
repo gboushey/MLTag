@@ -3,11 +3,12 @@ import pandas as pd
 import re
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
-import os
+import operator
   
 
-def classify_text(text, classifier):
+def classify_text(text, classifier, classifier_type):
     classifier = classifier.replace(" ","_")
+    classifier = classifier + "_" + classifier_type 
     text = [re.sub("[^a-zA-Z0-9]"," ", text)]
     
     with open('./Classifiers/clf_' + classifier + '.pickle', 'rb') as f:
@@ -22,11 +23,12 @@ def classify_text(text, classifier):
     test_data_features = vectorizer.transform(text)
 
     binary_predictions = clf.predict_proba(test_data_features)
-
-    return{classifier:{"probability":binary_predictions[0][1]}}
+    
+    return binary_predictions[0][1]
+    #return{classifier:{"probability":binary_predictions[0][1]}}
     
  
-def classify_list(text, classifiers):
+def classify_list(text, classifiers, classifier_type):
     """Assign probability that a section of text belongs to one or more classifiers.
 
        Args:
@@ -39,16 +41,22 @@ def classify_list(text, classifiers):
     class_predictions = {}
     
     for c in classifiers:
-        class_predictions.update(classify_text(text, c))
+        class_predictions[c] = classify_text(text, c, classifier_type)
+        
+    print(sorted(class_predictions.items(), key=operator.itemgetter(1), reverse=True))
     
-    return {"class_predictions":class_predictions}
+    #return {"class_predictions":sorted(class_predictions, key=lambda x:sorted(x.keys()))}
+    
+    
+    return {"class_predictions":sorted(class_predictions.items(), key=operator.itemgetter(1), reverse=True)}
 
 def get_classifiers():
     classifiers = []
     for file in os.listdir("./Classifiers"):
-        if file.startswith("clf_"):
-            classifiers.append(file[4:][:-7])
-            
+        if file.startswith("clf_") and "_RandomForest" in file:
+            classifier_name = file[4:][:-7]
+            classifiers.append(classifier_name[:-13])
+        
     return classifiers
 
 def get_features(classifier):
