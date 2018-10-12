@@ -3,6 +3,7 @@ import pandas as pd
 import re
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
+import os
 import operator
   
 
@@ -41,12 +42,7 @@ def classify_list(text, classifiers, classifier_type):
     class_predictions = {}
     
     for c in classifiers:
-        class_predictions[c] = classify_text(text, c, classifier_type)
-        
-    print(sorted(class_predictions.items(), key=operator.itemgetter(1), reverse=True))
-    
-    #return {"class_predictions":sorted(class_predictions, key=lambda x:sorted(x.keys()))}
-    
+        class_predictions[c] = classify_text(text, c, classifier_type)    
     
     return {"class_predictions":sorted(class_predictions.items(), key=operator.itemgetter(1), reverse=True)}
 
@@ -67,11 +63,9 @@ def get_features(classifier):
         vectorizer = pickle.load(f)     
     
     features = dict(zip(vectorizer.get_feature_names(), clf.feature_importances_))
+        
+    return {"features":sorted(features.items(), key=operator.itemgetter(1), reverse=True)}
     
-    features = {key:val for key, val in features.items() if val > 0}
-    
-    return features
-
 def get_oversample(classifier):
     with open('./Classifiers/oversample_' + classifier + '.pickle', 'rb') as f:
         oversample = pickle.load(f)

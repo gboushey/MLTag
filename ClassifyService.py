@@ -29,6 +29,7 @@ def classifiers():
 def features():
     classifier = request.query.classifier
     classifier = classifier.replace(" ","_")
+    classifier = classifier + '_RandomForest'
     
     return get_features(classifier)
 
